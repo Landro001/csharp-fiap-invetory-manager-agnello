@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
-
-namespace VinheriaConsole
+﻿namespace VinheriaConsole
 {
     class Vinho
     {
@@ -14,7 +9,6 @@ namespace VinheriaConsole
         public string Fornecedor { get; set; }
         public string Regiao { get; set; }
         public int Quantidade { get; set; }
-        public DateTime Validade { get; set; }
     }
 
     class Program
@@ -32,7 +26,7 @@ namespace VinheriaConsole
                 Console.WriteLine("[2] Consultar estoque");
                 Console.WriteLine("[3] Entrada de vinho no estoque");
                 Console.WriteLine("[4] Saída de vinho do estoque");
-                Console.WriteLine("[5] Alertas (Estoque Baixo/Validade)");
+                Console.WriteLine("[5] Alertas (Estoque Baixo)");
                 Console.WriteLine("[0] Sair");
                 Console.Write("Escolha uma opção: ");
                 string opcao = Console.ReadLine()?.Trim();
@@ -92,27 +86,6 @@ namespace VinheriaConsole
             }
         }
 
-        static DateTime LerData(string mensagem)
-        {
-            DateTime data;
-            while (true)
-            {
-                Console.Write(mensagem);
-                string entrada = Console.ReadLine();
-                if (!DateTime.TryParse(entrada, out data))
-                {
-                    Console.WriteLine("Data inválida. Digite no formato YYYY-MM-DD.");
-                    continue;
-                }
-                if (data < DateTime.Today)
-                {
-                    Console.WriteLine("Data não pode ser anterior à data de hoje.");
-                    continue;
-                }
-                return data;
-            }
-        }
-
         static string LerTexto(string mensagem, bool obrigatorio = true, int maxLength = 100)
         {
             string entrada;
@@ -144,7 +117,6 @@ namespace VinheriaConsole
             string fornecedor = LerTexto("Fornecedor: ");
             string regiao = LerTexto("Região de Origem: ");
             int quantidade = LerInteiro("Quantidade inicial: ", 0);
-            DateTime validade = LerData("Validade (YYYY-MM-DD): ");
 
             if (estoque.Any(x =>
                 string.Equals(x.Nome, nome, StringComparison.OrdinalIgnoreCase) &&
@@ -164,8 +136,7 @@ namespace VinheriaConsole
                 Safra = safra,
                 Fornecedor = fornecedor,
                 Regiao = regiao,
-                Quantidade = quantidade,
-                Validade = validade
+                Quantidade = quantidade
             });
 
             Console.WriteLine("\nVinho cadastrado com sucesso!");
@@ -183,11 +154,11 @@ namespace VinheriaConsole
             }
             else
             {
-                Console.WriteLine("ID | Nome           | Tipo      | Safra | Fornecedor    | Região        | Qtde | Validade");
+                Console.WriteLine("ID | Nome           | Tipo      | Safra | Fornecedor    | Região        | Qtde");
                 Console.WriteLine(new string('-', 90));
                 foreach (var vinho in estoque)
                 {
-                    Console.WriteLine($"{vinho.Id,2} | {vinho.Nome,-14} | {vinho.Tipo,-9} | {vinho.Safra,5} | {vinho.Fornecedor,-13} | {vinho.Regiao,-13} | {vinho.Quantidade,4} | {vinho.Validade.ToShortDateString()}");
+                    Console.WriteLine($"{vinho.Id,2} | {vinho.Nome,-14} | {vinho.Tipo,-9} | {vinho.Safra,5} | {vinho.Fornecedor,-13} | {vinho.Regiao,-13} | {vinho.Quantidade,4}");
                 }
             }
             EsperarRetorno();
@@ -255,9 +226,8 @@ namespace VinheriaConsole
             Console.WriteLine("--- ALERTAS ---");
             int minimoEstoque = 5;
             var estoqueBaixo = estoque.Where(x => x.Quantidade <= minimoEstoque).ToList();
-            var proximosVencer = estoque.Where(x => (x.Validade - DateTime.Today).TotalDays <= 30).ToList();
 
-            if (estoqueBaixo.Count == 0 && proximosVencer.Count == 0)
+            if (estoqueBaixo.Count == 0)
             {
                 Console.WriteLine("Nenhum alerta no momento.");
             }
@@ -268,13 +238,6 @@ namespace VinheriaConsole
                     Console.WriteLine("\nVinhos com estoque baixo:");
                     foreach (var v in estoqueBaixo)
                         Console.WriteLine($"- {v.Nome} (ID: {v.Id}) | Quantidade: {v.Quantidade}");
-                }
-
-                if (proximosVencer.Count > 0)
-                {
-                    Console.WriteLine("\nVinhos próximos da validade:");
-                    foreach (var v in proximosVencer)
-                        Console.WriteLine($"- {v.Nome} (ID: {v.Id}) | Validade: {v.Validade.ToShortDateString()}");
                 }
             }
             EsperarRetorno();
@@ -293,11 +256,11 @@ namespace VinheriaConsole
 
         static void ExibirVinhosResumido()
         {
-            Console.WriteLine("ID | Nome               | Qtde | Safra | Validade");
+            Console.WriteLine("ID | Nome               | Qtde | Safra");
             Console.WriteLine(new string('-', 55));
             foreach (var v in estoque)
             {
-                Console.WriteLine($"{v.Id,2} | {v.Nome,-18} | {v.Quantidade,4} | {v.Safra,5} | {v.Validade.ToShortDateString()}");
+                Console.WriteLine($"{v.Id,2} | {v.Nome,-18} | {v.Quantidade,4} | {v.Safra,5}");
             }
             Console.WriteLine();
         }
